@@ -33,7 +33,7 @@ pub const CHANNEL_IDENTITY: ChannelIdentity = ChannelIdentity {
     id: "xboard",
     service_slug: "clash-verge-service-xboard",
     windows_service_name: "clash_verge_service_xboard",
-    service_display_name: "Clash Verge Xboard Service",
+    service_display_name: "IKUN Service",
     macos_app_bundle_id: "io.github.jinshenganyuci.clash-verge-xboard",
     macos_service_id: "io.github.jinshenganyuci.clash-verge-xboard.service",
 };
