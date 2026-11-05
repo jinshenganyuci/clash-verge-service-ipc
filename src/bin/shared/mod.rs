@@ -30,7 +30,7 @@ pub(crate) fn run_maintenance_if_requested() -> Result<bool, Error> {
     Ok(true)
 }
 
-#[cfg(all(target_os = "macos", not(feature = "development-channel")))]
+#[cfg(all(target_os = "macos", not(any(feature = "development-channel", feature = "xboard-channel"))))]
 pub fn uninstall_old_service() -> Result<(), Error> {
     use std::path::Path;
 

@@ -13,7 +13,39 @@ use windows_sys::Win32::{
 };
 
 pub(super) fn require_no_registered_services() -> Result<()> {
+    #[cfg(feature = "xboard-channel")]
+    return require_services_absent(&[crate::WINDOWS_SERVICE_NAME]);
+    #[cfg(not(feature = "xboard-channel"))]
     require_services_absent(&["clash_verge_service", "clash_verge_service_dev"])
+}
+
+#[cfg(feature = "xboard-channel")]
+fn belongs_to_channel(pid: u32) -> Result<bool> {
+    use windows_sys::Win32::System::Threading::{
+        OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, QueryFullProcessImageNameW,
+    };
+
+    let raw = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid) };
+    if raw.is_null() {
+        return Ok(false);
+    }
+    let process = unsafe { OwnedHandle::from_raw_handle(raw) };
+    let mut buffer = vec![0u16; 32768];
+    let mut length = buffer.len() as u32;
+    if unsafe { QueryFullProcessImageNameW(process.as_raw_handle(), 0, buffer.as_mut_ptr(), &mut length) } == 0 {
+        return Ok(false);
+    }
+    let normalize = |path: &std::path::Path| {
+        path.to_string_lossy().trim_start_matches(r"\\?\").to_ascii_lowercase()
+    };
+    let executable = std::path::PathBuf::from(String::from_utf16(&buffer[..length as usize])?);
+    let own_executable = std::env::current_exe()?;
+    let app_root = own_executable.parent().context("executable has no parent directory")?;
+    let service_paths = crate::service_paths()?;
+    let executable = normalize(&executable);
+    Ok([app_root, service_paths.persistent_state_dir()]
+        .iter()
+        .any(|root| executable.starts_with(&format!("{}\\", normalize(root).trim_end_matches('\\')))))
 }
 
 fn require_services_absent(names: &[&str]) -> Result<()> {
@@ -83,6 +115,11 @@ pub(super) fn require_no_core_process(include_service: bool) -> Result<()> {
         if CORE_NAMES.iter().any(|core| name.eq_ignore_ascii_case(core))
             || (include_service && name.eq_ignore_ascii_case("clash-verge-service.exe"))
         {
+            #[cfg(feature = "xboard-channel")]
+            if !belongs_to_channel(entry.th32ProcessID)? {
+                found = unsafe { Process32NextW(snapshot.as_raw_handle(), &mut entry) };
+                continue;
+            }
             bail!(
                 "process {name} (PID {}) is still running; refusing a second core",
                 entry.th32ProcessID

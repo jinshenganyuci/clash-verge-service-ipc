@@ -46,6 +46,7 @@ required-features = ["client"]
 
 [features]
 development-channel = []
+xboard-channel = []
 standalone = [
     "kode-bridge",
     "kode-bridge/client",

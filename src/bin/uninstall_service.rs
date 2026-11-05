@@ -8,7 +8,7 @@ mod shared;
 use anyhow::Error;
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 use shared::run_command;
-#[cfg(all(target_os = "macos", not(feature = "development-channel")))]
+#[cfg(all(target_os = "macos", not(any(feature = "development-channel", feature = "xboard-channel"))))]
 use shared::uninstall_old_service;
 use shared::{enter_repair_gate, run_maintenance_if_requested};
 
@@ -115,7 +115,7 @@ fn main() -> Result<(), Error> {
     let _gate = enter_repair_gate()?;
     let debug = env::args().any(|arg| arg == "--debug");
 
-    #[cfg(not(feature = "development-channel"))]
+    #[cfg(not(any(feature = "development-channel", feature = "xboard-channel")))]
     let _ = uninstall_old_service();
     let bundle_path = format!(
         "/Library/PrivilegedHelperTools/{}.bundle",

@@ -14,8 +14,10 @@ use windows_sys::Win32::{
     System::Threading::{CreateMutexExW, ReleaseMutex, WaitForSingleObject},
 };
 
-#[cfg(not(feature = "test"))]
+#[cfg(all(not(feature = "test"), not(feature = "xboard-channel")))]
 pub(super) const NAME: &str = r"Global\clash-verge-service.core-execution";
+#[cfg(all(not(feature = "test"), feature = "xboard-channel"))]
+pub(super) const NAME: &str = r"Global\clash-verge-service-xboard.core-execution";
 #[cfg(feature = "test")]
 pub(super) const NAME: &str = r"Global\clash-verge-service.core-execution-test";
 

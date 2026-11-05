@@ -164,8 +164,10 @@ fn coordination_path() -> Result<PathBuf> {
     // Both channels may keep idle helpers, but core execution is shared.
     #[cfg(feature = "test")]
     let name = "clash-verge-service.core-execution-test.lock";
-    #[cfg(not(feature = "test"))]
+    #[cfg(all(not(feature = "test"), not(feature = "xboard-channel")))]
     let name = "clash-verge-service.core-execution.lock";
+    #[cfg(all(not(feature = "test"), feature = "xboard-channel"))]
+    let name = "clash-verge-service-xboard.core-execution.lock";
     Ok(root.join(name))
 }
 

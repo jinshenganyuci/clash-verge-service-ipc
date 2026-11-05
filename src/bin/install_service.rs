@@ -13,7 +13,7 @@ use anyhow::{Context as _, bail};
 use sha2::{Digest as _, Sha256};
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 use shared::run_command;
-#[cfg(all(target_os = "macos", not(feature = "development-channel")))]
+#[cfg(all(target_os = "macos", not(any(feature = "development-channel", feature = "xboard-channel"))))]
 use shared::uninstall_old_service;
 use shared::{enter_repair_gate, run_maintenance_if_requested};
 use std::fs::{File, OpenOptions};
@@ -819,7 +819,7 @@ fn main() -> Result<(), Error> {
         debug,
     )?;
     wait_for_service_ready()?;
-    #[cfg(not(feature = "development-channel"))]
+    #[cfg(not(any(feature = "development-channel", feature = "xboard-channel")))]
     let _ = uninstall_old_service();
 
     Ok(())

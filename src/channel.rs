@@ -8,7 +8,7 @@ pub struct ChannelIdentity {
     pub macos_service_id: &'static str,
 }
 
-#[cfg(not(feature = "development-channel"))]
+#[cfg(not(any(feature = "development-channel", feature = "xboard-channel")))]
 pub const CHANNEL_IDENTITY: ChannelIdentity = ChannelIdentity {
     id: "production",
     service_slug: "clash-verge-service",
@@ -18,7 +18,7 @@ pub const CHANNEL_IDENTITY: ChannelIdentity = ChannelIdentity {
     macos_service_id: "io.github.clash-verge-rev.clash-verge-rev.service",
 };
 
-#[cfg(feature = "development-channel")]
+#[cfg(all(feature = "development-channel", not(feature = "xboard-channel")))]
 pub const CHANNEL_IDENTITY: ChannelIdentity = ChannelIdentity {
     id: "development",
     service_slug: "clash-verge-service-dev",
@@ -26,6 +26,16 @@ pub const CHANNEL_IDENTITY: ChannelIdentity = ChannelIdentity {
     service_display_name: "Clash Verge Development Service",
     macos_app_bundle_id: "io.github.clash-verge-rev.clash-verge-rev.dev",
     macos_service_id: "io.github.clash-verge-rev.clash-verge-rev.dev.service",
+};
+
+#[cfg(feature = "xboard-channel")]
+pub const CHANNEL_IDENTITY: ChannelIdentity = ChannelIdentity {
+    id: "xboard",
+    service_slug: "clash-verge-service-xboard",
+    windows_service_name: "clash_verge_service_xboard",
+    service_display_name: "Clash Verge Xboard Service",
+    macos_app_bundle_id: "io.github.jinshenganyuci.clash-verge-xboard",
+    macos_service_id: "io.github.jinshenganyuci.clash-verge-xboard.service",
 };
 
 pub const SERVICE_SLUG: &str = CHANNEL_IDENTITY.service_slug;
